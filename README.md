@@ -34,3 +34,12 @@ const FieldDescriptor entity_fields[] = {
     FIELD_DESC(Entity, name, FIELD_VAR_STRING)
 };
 ```
+
+Then encode/decode like this:
+
+```c
+int len = lightrpc_serialize(buffer, &entity, 1, entity_fields, 3);
+
+Entity decoded = {0};
+lightrpc_deserialize(buffer, len, &decoded, entity_fields, 3);
+```
