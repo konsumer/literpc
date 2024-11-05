@@ -1,6 +1,6 @@
 This is a very lightweight RPC protocol I designed to be easy to parse in any language, for sending commands over wasm.
 
-The basic idea is that the firs byte is a "command" (0-255) and the rest is encoded bytes, and both sides need to know the structure.
+The basic idea is that the firs byte is a "command" (0-255) and the rest is encoded bytes, and both sides need to know the structure. Think of it as very low-end grpc/protobuf.
 
 Here is how you compile the test:
 
