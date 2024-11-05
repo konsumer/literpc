@@ -21,7 +21,7 @@ const FieldDescriptor point_fields[] = {
 const FieldDescriptor entity_fields[] = {
     FIELD_DESC(Entity, id, FIELD_INT),
     STRUCT_FIELD_DESC(Entity, location, point_fields, 2),
-    FIELD_DESC(Entity, name, FIELD_VAR_STRING)
+    FIELD_DESC(Entity, name, FIELD_STRING)
 };
 
 int main() {

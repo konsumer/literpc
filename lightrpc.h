@@ -7,8 +7,7 @@
 typedef enum {
     FIELD_INT,
     FIELD_FLOAT,
-    FIELD_FIXED_STRING,
-    FIELD_VAR_STRING,
+    FIELD_STRING,
     FIELD_STRUCT,
     FIELD_CHAR
 } FieldType;
@@ -44,13 +43,12 @@ int lightrpc_serialize(uint8_t* buffer, const void* data,
             case FIELD_CHAR:
             case FIELD_INT:
             case FIELD_FLOAT:
-            case FIELD_FIXED_STRING:
                 buffer[pos++] = fields[i].size;
                 memcpy(buffer + pos, src, fields[i].size);
                 pos += fields[i].size;
                 break;
 
-            case FIELD_VAR_STRING: {
+            case FIELD_STRING: {
                 const char* str = *(const char**)src;
                 uint8_t len = str ? strlen(str) : 0;
                 buffer[pos++] = len;
@@ -97,13 +95,12 @@ int lightrpc_deserialize(const uint8_t* buffer, int buffer_len,
         switch (fields[i].type) {
             case FIELD_INT:
             case FIELD_FLOAT:
-            case FIELD_FIXED_STRING:
                 if (size != fields[i].size || pos + size > buffer_len) return -1;
                 memcpy(dst, buffer + pos, size);
                 pos += size;
                 break;
 
-            case FIELD_VAR_STRING: {
+            case FIELD_STRING: {
                 if (pos + size > buffer_len) return -1;
                 char** str_ptr = (char**)dst;
                 *str_ptr = malloc(size + 1);
@@ -139,7 +136,7 @@ void lightrpc_free_strings(void* data,
                         const FieldDescriptor* fields,
                         int field_count) {
     for (int i = 0; i < field_count; i++) {
-        if (fields[i].type == FIELD_VAR_STRING) {
+        if (fields[i].type == FIELD_STRING) {
             char** str_ptr = (char**)((uint8_t*)data + fields[i].offset);
             free(*str_ptr);
             *str_ptr = NULL;
