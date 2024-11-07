@@ -2,6 +2,8 @@ This is a very lightweight RPC protocol I designed to be easy to parse in any la
 
 The basic idea is that the firs byte is a "command" (0-255) and the rest is encoded bytes, and both sides need to know the structure. Think of it as very low-end grpc/protobuf.
 
+This allows you to expose a single function in your wasm-host (or whatever else) that can respond to RPC-requests, and get complex params, as well as return complex responses.
+
 Here is how you compile the test:
 
 ```
@@ -35,6 +37,7 @@ const FieldDescriptor entity_fields[] = {
 };
 const int entity_fields_count = 3;
 
+// this defines the operations you can do in your RPC
 typedef enum {
   OP_MESS_WITH_ENTITY
 } Op;
@@ -44,6 +47,7 @@ typedef enum {
 Then encode/decode like this:
 
 ```c
+// call OP_MESS_WITH_ENTITY(entity) somewhere else
 int len = lightrpc_serialize(buffer, &entity, OP_MESS_WITH_ENTITY, entity_fields, entity_fields_count);
 
 Entity decoded = {0};
