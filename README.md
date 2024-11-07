@@ -33,12 +33,18 @@ const FieldDescriptor entity_fields[] = {
     STRUCT_FIELD_DESC(Entity, location, point_fields, 2),
     FIELD_DESC(Entity, name, FIELD_STRING)
 };
+const int entity_fields_count = 3;
+
+typedef enum {
+  OP_MESS_WITH_ENTITY
+} Op;
+
 ```
 
 Then encode/decode like this:
 
 ```c
-int len = lightrpc_serialize(buffer, &entity, 1, entity_fields, 3);
+int len = lightrpc_serialize(buffer, &entity, OP_MESS_WITH_ENTITY, entity_fields, entity_fields_count);
 
 Entity decoded = {0};
 lightrpc_deserialize(buffer, len, &decoded, entity_fields, 3);
