@@ -57,7 +57,7 @@ Entity entity = {
   .name = strdup("Test Entity")
 };
 
-// call OP_MESS_WITH_ENTITY(entity) somewhere else
+// call OP_MESS_WITH_ENTITY(entity) somewhere else (send it buffer, using len)
 int len = lightrpc_serialize(buffer, &entity, OP_MESS_WITH_ENTITY, entity_fields, entity_fields_count);
 
 // do this in your host
