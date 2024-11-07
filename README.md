@@ -47,9 +47,23 @@ typedef enum {
 Then encode/decode like this:
 
 ```c
+// setup on both sides
+uint8_t buffer[1024];
+
+// create an entiry
+Entity entity = {
+  .id = 123,
+  .location = { .x = 1.0f, .y = 2.0f },
+  .name = strdup("Test Entity")
+};
+
 // call OP_MESS_WITH_ENTITY(entity) somewhere else
 int len = lightrpc_serialize(buffer, &entity, OP_MESS_WITH_ENTITY, entity_fields, entity_fields_count);
 
+// do this in your host
 Entity decoded = {0};
 lightrpc_deserialize(buffer, len, &decoded, entity_fields, 3);
+
+// you can also get the op that was called
+Op op = buffer[0];
 ```
