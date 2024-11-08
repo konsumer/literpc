@@ -35,7 +35,7 @@ I have a json format that can be used to generate bindings for different languag
 Here are the valid-types:
 - `Int64`
 - `Uint64`
-- 'Float64'
+- `Float64`
 - `Int32`
 - `Uint32`
 - `Float32`
@@ -55,31 +55,11 @@ The bytes look like this:
 ```
 
 > [!NOTE]
-> This requires lengths & counts to be `<65,536`, since the are `Uint16` type. If you need more than that, break your message up into smaller pieces.
+> This requires lengths & counts to be `<65,536`, since they are `Uint16` type. If you need more than that, break your message up into smaller pieces.
 
 - You can skip an unused field by setting size to 0.
 - All numeric values are encoded little-endian (which matches WASM and most modern things.)
 - submessages put LENGTH in COMMAND position
-
-## using in other languages
-
-You can do this in javascript:
-
-```js
-import { serialize, deserialize } from 'lightrpc'
-import { readFile } from 'node:fs/promises'
-
-const {ops, ...defs} = JSON.parse(await readFile('tools/defs.example.json', 'utf8'))
-
-const thing = {
-  id: 123,
-  location: {x: 1, y: 2 },
-  name: 'Test Entity'
-}
-
-const bytes = serialize(ops.indexOf('MESS_WITH_MY_THING'), defs, 'MyThing', thing)
-const [command, decoded] = deserialize(defs, 'MyThing', bytes)
-```
 
 Here is the breakdown of how it's encodes:
 
@@ -104,7 +84,31 @@ Here is the breakdown of how it's encodes:
 ]
 ```
 
-I also created a tool to generate light C code from my JSON format (similar to what you see in [test.c](tools/test.c).) Use it like this:
+## usage
+
+### javascript
+
+You can do this in javascript:
+
+```js
+import { serialize, deserialize } from 'lightrpc'
+import { readFile } from 'node:fs/promises'
+
+const {ops, ...defs} = JSON.parse(await readFile('tools/defs.example.json', 'utf8'))
+
+const thing = {
+  id: 123,
+  location: {x: 1, y: 2 },
+  name: 'Test Entity'
+}
+
+const bytes = serialize(ops.indexOf('MESS_WITH_MY_THING'), defs, 'MyThing', thing)
+const [command, decoded] = deserialize(defs, 'MyThing', bytes)
+```
+
+### C
+
+I created a tool to generate light C code from my JSON format (similar to what you see in [test.c](tools/test.c).) Use it like this:
 
 ```
 node tools/lightrpc_gen_c.js tools/defs.example.json
