@@ -1,148 +1,125 @@
-// use this in header in your C project to use lightrpc!
-// https://github.com/konsumer/lightrpc
-
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <stddef.h>
 #include <stdlib.h>
 
 typedef enum {
-    FIELD_INT,
-    FIELD_FLOAT,
+    FIELD_INT64,
+    FIELD_UINT64,
+    FIELD_INT,   // 32bit
+    FIELD_UINT,  // 32bit
+    FIELD_FLOAT, // 32bit
+    FIELD_INT16,
+    FIELD_UINT16,
+    FIELD_INT8,
+    FIELD_UINT8,
     FIELD_STRING,
-    FIELD_STRUCT,
-    FIELD_CHAR
+    FIELD_SUBMESSAGE
 } FieldType;
 
-// Extended field descriptor to include nested struct info
 typedef struct {
     size_t offset;
-    size_t size;
     FieldType type;
-    const struct FieldDescriptor* nested_fields;
-    int nested_field_count;
+    const void* submsg_fields;
+    int submsg_field_count;
 } FieldDescriptor;
 
-// Modified macro for regular fields
-#define FIELD_DESC(type, field, field_type) \
-    { offsetof(type, field), sizeof(((type*)0)->field), field_type, NULL, 0 }
+// Helper macro to get offset of a field in a struct
+#define FIELD_OFFSET(type, field) ((size_t)&((type*)0)->field)
 
-// New macro for struct fields
-#define STRUCT_FIELD_DESC(type, field, nested_fields, count) \
-    { offsetof(type, field), sizeof(((type*)0)->field), FIELD_STRUCT, nested_fields, count }
+// Macro to create a field descriptor for basic types
+#define LIGHTRPC_FIELD(type, field, field_type) { FIELD_OFFSET(type, field), field_type, NULL, 0 }
 
-int lightrpc_serialize(uint8_t* buffer, const void* data,
-                    uint8_t cmd,
-                    const FieldDescriptor* fields,
-                    int field_count) {
-    int pos = 0;
-    buffer[pos++] = cmd;
+// Macro to create a field descriptor for nested structs
+#define LIGHTRPC_FIELD_STRUCT(type, field, nested_fields, count) { FIELD_OFFSET(type, field), FIELD_SUBMESSAGE, nested_fields, count }
 
-    for (int i = 0; i < field_count; i++) {
-        const uint8_t* src = (const uint8_t*)data + fields[i].offset;
-
-        switch (fields[i].type) {
-            case FIELD_CHAR:
-            case FIELD_INT:
-            case FIELD_FLOAT:
-                buffer[pos++] = fields[i].size;
-                memcpy(buffer + pos, src, fields[i].size);
-                pos += fields[i].size;
-                break;
-
-            case FIELD_STRING: {
-                const char* str = *(const char**)src;
-                uint8_t len = str ? strlen(str) : 0;
-                buffer[pos++] = len;
-                if (len > 0) {
-                    memcpy(buffer + pos, str, len);
-                    pos += len;
-                }
-                break;
-            }
-
-            case FIELD_STRUCT: {
-                // Recursively serialize nested struct
-                int nested_size = lightrpc_serialize(
-                    buffer + pos + 1,  // +1 for size byte
-                    src,
-                    0,  // No cmd byte for nested structs
-                    fields[i].nested_fields,
-                    fields[i].nested_field_count
-                );
-                buffer[pos++] = nested_size;
-                pos += nested_size;
-                break;
-            }
-        }
-    }
-
-    return pos;
+// Helper functions for serialization
+static void write_uint16(uint8_t* buf, uint16_t value) {
+    buf[0] = value & 0xFF;
+    buf[1] = (value >> 8) & 0xFF;
 }
 
-int lightrpc_deserialize(const uint8_t* buffer, int buffer_len,
-                      void* data,
-                      const FieldDescriptor* fields,
-                      int field_count) {
-    if (buffer_len < 1) return -1;
-
-    int pos = 1;  // Skip command byte
-
-    for (int i = 0; i < field_count; i++) {
-        uint8_t* dst = (uint8_t*)data + fields[i].offset;
-
-        if (pos >= buffer_len) return -1;
-        uint8_t size = buffer[pos++];
-
-        switch (fields[i].type) {
-            case FIELD_INT:
-            case FIELD_FLOAT:
-                if (size != fields[i].size || pos + size > buffer_len) return -1;
-                memcpy(dst, buffer + pos, size);
-                pos += size;
-                break;
-
-            case FIELD_STRING: {
-                if (pos + size > buffer_len) return -1;
-                char** str_ptr = (char**)dst;
-                *str_ptr = malloc(size + 1);
-                if (size > 0) {
-                    memcpy(*str_ptr, buffer + pos, size);
-                }
-                (*str_ptr)[size] = '\0';
-                pos += size;
-                break;
-            }
-
-            case FIELD_STRUCT: {
-                // Recursively deserialize nested struct, but don't include size byte twice
-                int result = lightrpc_deserialize(
-                    buffer + pos,     // Start after size byte
-                    size,             // Just use the size
-                    dst,
-                    fields[i].nested_fields,
-                    fields[i].nested_field_count
-                );
-                if (result < 0) return -1;
-                pos += size;
-                break;
-            }
-        }
-    }
-
-    return pos;
+static uint16_t read_uint16(const uint8_t* buf) {
+    return (uint16_t)buf[0] | ((uint16_t)buf[1] << 8);
 }
 
-// Helper to free dynamic strings
-void lightrpc_free_strings(void* data,
-                        const FieldDescriptor* fields,
-                        int field_count) {
+int lightrpc_serialize(uint8_t* buffer, const void* data, uint16_t cmd, const FieldDescriptor* fields, int field_count) {
+    int offset = 0;
+    write_uint16(buffer + offset, cmd);
+    offset += 2;
+
     for (int i = 0; i < field_count; i++) {
-        if (fields[i].type == FIELD_STRING) {
-            char** str_ptr = (char**)((uint8_t*)data + fields[i].offset);
-            free(*str_ptr);
-            *str_ptr = NULL;
+        const FieldDescriptor* field = &fields[i];
+        const uint8_t* field_data = (const uint8_t*)data + field->offset;
+
+        if (field->type == FIELD_STRING) {
+            const char* str = *(const char**)field_data;
+            if (!str) {
+                write_uint16(buffer + offset, 0);
+                offset += 2;
+                continue;
+            }
+            uint16_t len = strlen(str);
+            write_uint16(buffer + offset, len);
+            memcpy(buffer + offset + 2, str, len);
+            offset += 2 + len;
+        }
+        else if (field->type == FIELD_SUBMESSAGE) {
+            int sublen = lightrpc_serialize(buffer + offset, field_data, 0,
+                field->submsg_fields, field->submsg_field_count);
+            write_uint16(buffer + offset, sublen);
+            offset += sublen;
+        }
+        else {
+            int size;
+            switch (field->type) {
+                case FIELD_INT64:
+                case FIELD_UINT64: size = 8; break;
+                case FIELD_INT:
+                case FIELD_UINT:
+                case FIELD_FLOAT: size = 4; break;
+                case FIELD_INT16:
+                case FIELD_UINT16: size = 2; break;
+                case FIELD_INT8:
+                case FIELD_UINT8: size = 1; break;
+                default: continue;
+            }
+            write_uint16(buffer + offset, size);
+            memcpy(buffer + offset + 2, field_data, size);
+            offset += 2 + size;
         }
     }
+    return offset;
+}
+
+int lightrpc_deserialize(const uint8_t* buffer, int buffer_len, void* data, const FieldDescriptor* fields, int field_count) {
+    int offset = 2; // Skip command
+    uint16_t cmd = read_uint16(buffer);
+
+    for (int i = 0; i < field_count && offset < buffer_len; i++) {
+        const FieldDescriptor* field = &fields[i];
+        uint8_t* field_data = (uint8_t*)data + field->offset;
+        uint16_t len = read_uint16(buffer + offset);
+        offset += 2;
+
+        if (len == 0) continue;
+
+        if (field->type == FIELD_STRING) {
+            char* str = malloc(len + 1);
+            memcpy(str, buffer + offset, len);
+            str[len] = '\0';
+            *(char**)field_data = str;
+            offset += len;
+        }
+        else if (field->type == FIELD_SUBMESSAGE) {
+            lightrpc_deserialize(buffer + offset - 2, len + 2, field_data,
+                field->submsg_fields, field->submsg_field_count);
+            offset += len - 2;
+        }
+        else {
+            memcpy(field_data, buffer + offset, len);
+            offset += len;
+        }
+    }
+
+    return cmd;
 }

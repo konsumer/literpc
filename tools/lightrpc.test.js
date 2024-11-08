@@ -32,9 +32,6 @@ test('encode', () => {
     105, 116, 121, 
   ])
 
-  console.log(thing.name.length)
-  console.log(encoder.encode(thing.name))
-
   const bytes = serialize(ops.indexOf('MESS_WITH_MY_THING'), defs, 'MyThing', thing)
   expect(bytes).toEqual(expected)
 })

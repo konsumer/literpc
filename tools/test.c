@@ -1,6 +1,7 @@
 // this is a tester for lightrpc
 
 #include <stdio.h>
+#include <assert.h>
 #include "../lightrpc.h"
 
 void dumphex(const void* data, size_t size) {
@@ -33,44 +34,50 @@ void dumphex(const void* data, size_t size) {
 }
 
 typedef struct {
-  float x;
-  float y;
+    float x;
+    float y;
 } Point;
 
 typedef struct {
-  int id;
-  Point location;
-  char* name;
+    int id;
+    Point location;
+    char* name;
 } Entity;
 
 // Field descriptors for Point
 const FieldDescriptor point_fields[] = {
-  FIELD_DESC(Point, x, FIELD_FLOAT),
-  FIELD_DESC(Point, y, FIELD_FLOAT)
+    LIGHTRPC_FIELD(Point, x, FIELD_FLOAT),
+    LIGHTRPC_FIELD(Point, y, FIELD_FLOAT)
 };
+const int point_fields_len = 2;
 
 // Field descriptors for Entity
 const FieldDescriptor entity_fields[] = {
-  FIELD_DESC(Entity, id, FIELD_INT),
-  STRUCT_FIELD_DESC(Entity, location, point_fields, 2),
-  FIELD_DESC(Entity, name, FIELD_STRING)
+    LIGHTRPC_FIELD(Entity, id, FIELD_INT),
+    LIGHTRPC_FIELD_STRUCT(Entity, location, point_fields, point_fields_len),
+    LIGHTRPC_FIELD(Entity, name, FIELD_STRING)
 };
+const int entity_fields_len = 3;
 
 int main() {
-  uint8_t buffer[1024];
-
   Entity entity = {
-    .id = 123,
-    .location = { .x = 1.0f, .y = 2.0f },
-    .name = strdup("Test Entity")
+      .id = 123,
+      .location = { .x = 1.0f, .y = 2.0f },
+      .name = strdup("Test Entity")
   };
 
-  uint8_t expectedBuffer[35] = {
+  uint8_t buffer[1024];
+  int len = lightrpc_serialize(buffer, &entity, 1, entity_fields, entity_fields_len);
+
+  Entity decoded = {0};
+  int cmd = lightrpc_deserialize(buffer, len, &decoded, entity_fields, entity_fields_len);
+
+  uint8_t expectedBuffer[] = {
     1,0,               // op = 1
-    
+
     4,0,               // id:len = 4
     123,0,0,0,         // id:i32 = 123
-    
+
     14,0,              // location:len = 14
     4,0,               // location.x:len = 4
     0,0,128,63,        // location.x:f32 = 1.0
@@ -78,45 +85,26 @@ int main() {
     0,0,0,64,          // location.y:f32 = 2.0
 
     11,0,              // name:len = 11
-    
+
     84, 101, 115, 116, // name:bytes
     32,  69, 110, 116,
-    105, 116, 121, 
+    105, 116, 121
   };
 
-  printf("SERIALIZE:\n\n");
-
-  int len = lightrpc_serialize(buffer, &entity, 1, entity_fields, 3);
-
   printf("Expected:\n");
-  dumphex(expectedBuffer, 35);
-  printf("\n");
-  
-  printf("Received:\n");
+  dumphex(expectedBuffer, sizeof(expectedBuffer));
+
+  printf("\nReceived:\n");
   dumphex(buffer, len);
-  printf("\n");
 
-  printf("\nDESERIALIZE:\n\n");
+  assert(cmd == 1);
+  assert(decoded.id == entity.id);
+  assert(decoded.location.x == entity.location.x);
+  assert(decoded.location.y == entity.location.y);
+  assert(strcmp(decoded.name, entity.name) == 0);
 
-  Entity decoded = {0};
-  lightrpc_deserialize(buffer, len, &decoded, entity_fields, 3);
-  printf("id: %d\nlocation: %fx%f\nname: %s\n", decoded.id, decoded.location.x, decoded.location.y, decoded.name);
-
-  if (decoded.id != entity.id) {
-    printf("MISMATCH id: %d != %d\n", decoded.id, entity.id);
-  }
-  if (strcmp(decoded.name, entity.name) != 0) {
-    printf("MISMATCH name: %s != %s\n",  decoded.name, entity.name);
-  }
-  if (decoded.location.x != entity.location.x) {
-    printf("MISMATCH location.x: %f != %f\n", decoded.location.x, entity.location.x);
-  }
-  if (decoded.location.y != entity.location.y) {
-    printf("MISMATCH location.y: %f != %f\n", decoded.location.y, entity.location.y);
-  }
-
-  lightrpc_free_strings(&entity, entity_fields, 3);
-  lightrpc_free_strings(&decoded, entity_fields, 3);
-
+  free(entity.name);
+  free(decoded.name);
+  printf("\nTest passed!\n");
   return 0;
 }
