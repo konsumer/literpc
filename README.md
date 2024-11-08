@@ -33,6 +33,7 @@ I have a json format that can be used to generate bindings for different languag
 ```
 
 Here are the valid-types:
+
 - `Int64`
 - `Uint64`
 - `Float64`
@@ -88,10 +89,31 @@ Here is the breakdown of how it's encodes:
 
 ### javascript
 
+You can install with this:
+
+```
+npm i @konsumer/litetrpc
+```
+
+Or use it on the web:
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "@konsumer/litetrpc": "@konsumer/litetrpc"
+    }
+  }
+</script>
+<script type="module">
+import { serialize, deserialize } from '@konsumer/litetrpc'
+</script>
+```
+
 You can do this in javascript:
 
 ```js
-import { serialize, deserialize } from 'literpc'
+import { serialize, deserialize } from '@konsumer/litetrpc'
 import { readFile } from 'node:fs/promises'
 
 const {ops, ...defs} = JSON.parse(await readFile('tools/defs.example.json', 'utf8'))
@@ -113,3 +135,6 @@ I created a tool to generate light C code from my JSON format (similar to what y
 ```
 node tools/literpc_gen_c.js tools/defs.example.json
 ```
+
+
+

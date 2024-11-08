@@ -9,7 +9,7 @@
     "test:watch": "NODE_NO_WARNINGS=1 npx -y vitest --globals --ui",
     "test:c": "gcc tools/test.c -o lightrpctest && ./lightrpctest"
   },
-  "keywords": [],
+  "keywords": ["rpc", "serialize", "C", "wasm", "light"],
   "author": "David Konsumer <konsumer@jetboystudio.com> (https://konsumer.js.org/)",
   "license": "MIT",
   "devDependencies": {
@@ -17,5 +17,7 @@
   },
   "files": [
     "literpc.js"
-  ]
+  ],
+  "repository": "konsumer/litetrpc",
+  "funding": "https://github.com/sponsors/konsumer"
 }
