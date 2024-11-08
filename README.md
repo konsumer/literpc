@@ -86,10 +86,10 @@ Here is the breakdown of how it's encodes:
 ```js
 [
   1,0,               // op = 1
-  
+
   4,0,               // id:len = 4
   123,0,0,0,         // id:i32 = 123
-  
+
   14,0,              // location:len = 14
   4,0,               // location.x:len = 4
   0,0,128,63,        // location.x:f32 = 1.0
@@ -97,10 +97,15 @@ Here is the breakdown of how it's encodes:
   0,0,0,64,          // location.y:f32 = 2.0
 
   11,0,              // name:len = 11
-  
+
   84, 101, 115, 116, // name:bytes
   32,  69, 110, 116,
-  105, 116, 121, 
+  105, 116, 121,
 ]
 ```
 
+I also created a tool to generate light C code from my JSON format (similar to what you see in [test.c](tools/test.c).) Use it like this:
+
+```
+node tools/lightrpc_gen_c.js tools/defs.example.json
+```

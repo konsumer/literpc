@@ -59,7 +59,7 @@ const FieldDescriptor entity_fields[] = {
 };
 const int entity_fields_len = 3;
 
-int main() {
+int main(int argc, char *argv[]) {
   Entity entity = {
       .id = 123,
       .location = { .x = 1.0f, .y = 2.0f },

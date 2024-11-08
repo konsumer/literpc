@@ -5,6 +5,7 @@
 typedef enum {
     FIELD_INT64,
     FIELD_UINT64,
+    FIELD_FLOAT64,
     FIELD_INT,   // 32bit
     FIELD_UINT,  // 32bit
     FIELD_FLOAT, // 32bit
@@ -72,6 +73,7 @@ int lightrpc_serialize(uint8_t* buffer, const void* data, uint16_t cmd, const Fi
         else {
             int size;
             switch (field->type) {
+                case FIELD_FLOAT64:
                 case FIELD_INT64:
                 case FIELD_UINT64: size = 8; break;
                 case FIELD_INT:
