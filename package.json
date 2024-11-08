@@ -7,7 +7,8 @@
   "scripts": {
     "test": "NODE_NO_WARNINGS=1 npx -y vitest --run --globals",
     "test:watch": "NODE_NO_WARNINGS=1 npx -y vitest --globals --ui",
-    "test:c": "gcc tools/test.c -o lightrpctest && ./lightrpctest"
+    "test:c": "gcc tools/test.c -o lightrpctest && ./lightrpctest",
+    "test:py": "python3 tools/test.py"
   },
   "keywords": [
     "rpc",

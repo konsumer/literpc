@@ -136,5 +136,33 @@ I created a tool to generate light C code from my JSON format (similar to what y
 node tools/literpc_gen_c.js tools/defs.example.json
 ```
 
+Since C has no JSON parser built-in, I left out parsing the schema files, but with this technique, you can see how to serialize/deserialize your structs.
 
+### python
 
+I created a [python library](literpc.py). Use it like this:
+
+```py
+import literpc
+import json
+
+# load ops/defs from JSON
+with open('tools/defs.example.json') as data:
+  defs = json.load(data)
+  try:
+    ops = defs['ops']
+    del defs['ops']
+  except:
+    ops = []
+
+# test object
+thing = {
+  'id': 123,
+  'location': {'x': 1, 'y': 2},
+  'name': 'Test Entity'
+}
+
+b = literpc.serialize(ops.index('MESS_WITH_MY_THING'), defs, 'MyThing', thing)
+
+o = literpc.deserialize(defs, 'MyThing', b)
+```
