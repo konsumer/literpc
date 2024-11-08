@@ -1,5 +1,5 @@
 {
-  "name": "litetrpc",
+  "name": "@konsumer/litetrpc",
   "version": "0.0.1",
   "type": "module",
   "description": "Lightweight RPC protocol for C, js, and more",
