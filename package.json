@@ -1,6 +1,6 @@
 {
   "name": "@konsumer/litetrpc",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "type": "module",
   "description": "Lightweight RPC protocol for C, js, and more",
   "main": "lightrpc.js",
@@ -24,6 +24,9 @@
   "files": [
     "literpc.js"
   ],
-  "repository": "konsumer/litetrpc",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/konsumer/literpc"
+  },
   "funding": "https://github.com/sponsors/konsumer"
 }
