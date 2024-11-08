@@ -65,26 +65,38 @@ int main() {
     .name = strdup("Test Entity")
   };
 
-  uint8_t expectedBuffer[] = {
-      1,  0,  4,   0, 123,   0,   0,   0,  14,
-      0,  4,  0,   0,   0, 128,  63,   4,   0,
-      0,  0,  0,  64,  11,   0,  84, 101, 115,
-    116, 32, 69, 110, 116, 105, 116, 121
+  uint8_t expectedBuffer[35] = {
+    1,0,               // op = 1
+    
+    4,0,               // id:len = 4
+    123,0,0,0,         // id:i32 = 123
+    
+    14,0,              // location:len = 14
+    4,0,               // location.x:len = 4
+    0,0,128,63,        // location.x:f32 = 1.0
+    4,0,               // location.y:len = 4
+    0,0,0,64,          // location.y:f32 = 2.0
+
+    11,0,              // name:len = 11
+    
+    84, 101, 115, 116, // name:bytes
+    32,  69, 110, 116,
+    105, 116, 121, 
   };
 
   printf("SERIALIZE:\n\n");
 
   int len = lightrpc_serialize(buffer, &entity, 1, entity_fields, 3);
+
+  printf("Expected:\n");
+  dumphex(expectedBuffer, 35);
+  printf("\n");
+  
+  printf("Received:\n");
   dumphex(buffer, len);
   printf("\n");
 
-  for (int i=0;i<len;i++) {
-    if (expectedBuffer[i] != buffer[i]) {
-      printf("MISMATCH %d: %02X != %02X\n", i,  buffer[i], expectedBuffer[i]);
-    }
-  }
-
-  printf("\nDESERIALIZE:\n");
+  printf("\nDESERIALIZE:\n\n");
 
   Entity decoded = {0};
   lightrpc_deserialize(buffer, len, &decoded, entity_fields, 3);

@@ -59,6 +59,7 @@ The bytes look like this:
 
 - You can skip an unused field by setting size to 0.
 - All numeric values are encoded little-endian (which matches WASM and most modern things.)
+- submessages put LENGTH in COMMAND position
 
 ## using in other languages
 
@@ -79,3 +80,27 @@ const thing = {
 const bytes = serialize(ops.indexOf('MESS_WITH_MY_THING'), defs, 'MyThing', thing)
 const [command, decoded] = deserialize(defs, 'MyThing', bytes)
 ```
+
+Here is the breakdown of how it's encodes:
+
+```js
+[
+  1,0,               // op = 1
+  
+  4,0,               // id:len = 4
+  123,0,0,0,         // id:i32 = 123
+  
+  14,0,              // location:len = 14
+  4,0,               // location.x:len = 4
+  0,0,128,63,        // location.x:f32 = 1.0
+  4,0,               // location.y:len = 4
+  0,0,0,64,          // location.y:f32 = 2.0
+
+  11,0,              // name:len = 11
+  
+  84, 101, 115, 116, // name:bytes
+  32,  69, 110, 116,
+  105, 116, 121, 
+]
+```
+
