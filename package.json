@@ -1,6 +1,6 @@
 {
   "name": "@konsumer/litetrpc",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "Lightweight RPC protocol for C, js, and more",
   "main": "lightrpc.js",
@@ -9,7 +9,13 @@
     "test:watch": "NODE_NO_WARNINGS=1 npx -y vitest --globals --ui",
     "test:c": "gcc tools/test.c -o lightrpctest && ./lightrpctest"
   },
-  "keywords": ["rpc", "serialize", "C", "wasm", "light"],
+  "keywords": [
+    "rpc",
+    "serialize",
+    "C",
+    "wasm",
+    "light"
+  ],
   "author": "David Konsumer <konsumer@jetboystudio.com> (https://konsumer.js.org/)",
   "license": "MIT",
   "devDependencies": {
