@@ -28,10 +28,10 @@ typedef struct {
 #define FIELD_OFFSET(type, field) ((size_t)&((type*)0)->field)
 
 // Macro to create a field descriptor for basic types
-#define LIGHTRPC_FIELD(type, field, field_type) { FIELD_OFFSET(type, field), field_type, NULL, 0 }
+#define LITERPC_FIELD(type, field, field_type) { FIELD_OFFSET(type, field), field_type, NULL, 0 }
 
 // Macro to create a field descriptor for nested structs
-#define LIGHTRPC_FIELD_STRUCT(type, field, nested_fields, count) { FIELD_OFFSET(type, field), FIELD_SUBMESSAGE, nested_fields, count }
+#define LITERPC_FIELD_STRUCT(type, field, nested_fields, count) { FIELD_OFFSET(type, field), FIELD_SUBMESSAGE, nested_fields, count }
 
 // Helper functions for serialization
 static void write_uint16(uint8_t* buf, uint16_t value) {
@@ -43,7 +43,7 @@ static uint16_t read_uint16(const uint8_t* buf) {
     return (uint16_t)buf[0] | ((uint16_t)buf[1] << 8);
 }
 
-int lightrpc_serialize(uint8_t* buffer, const void* data, uint16_t cmd, const FieldDescriptor* fields, int field_count) {
+int literpc_serialize(uint8_t* buffer, const void* data, uint16_t cmd, const FieldDescriptor* fields, int field_count) {
     int offset = 0;
     write_uint16(buffer + offset, cmd);
     offset += 2;
@@ -65,7 +65,7 @@ int lightrpc_serialize(uint8_t* buffer, const void* data, uint16_t cmd, const Fi
             offset += 2 + len;
         }
         else if (field->type == FIELD_SUBMESSAGE) {
-            int sublen = lightrpc_serialize(buffer + offset, field_data, 0,
+            int sublen = literpc_serialize(buffer + offset, field_data, 0,
                 field->submsg_fields, field->submsg_field_count);
             write_uint16(buffer + offset, sublen);
             offset += sublen;
@@ -93,7 +93,7 @@ int lightrpc_serialize(uint8_t* buffer, const void* data, uint16_t cmd, const Fi
     return offset;
 }
 
-int lightrpc_deserialize(const uint8_t* buffer, int buffer_len, void* data, const FieldDescriptor* fields, int field_count) {
+int literpc_deserialize(const uint8_t* buffer, int buffer_len, void* data, const FieldDescriptor* fields, int field_count) {
     int offset = 2; // Skip command
     uint16_t cmd = read_uint16(buffer);
 
@@ -113,7 +113,7 @@ int lightrpc_deserialize(const uint8_t* buffer, int buffer_len, void* data, cons
             offset += len;
         }
         else if (field->type == FIELD_SUBMESSAGE) {
-            lightrpc_deserialize(buffer + offset - 2, len + 2, field_data,
+            literpc_deserialize(buffer + offset - 2, len + 2, field_data,
                 field->submsg_fields, field->submsg_field_count);
             offset += len - 2;
         }

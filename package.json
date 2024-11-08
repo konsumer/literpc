@@ -1,6 +1,6 @@
 {
-  "name": "lightrpc",
-  "version": "0.0.1",
+  "name": "litetrpc",
+  "version": "0.0.0",
   "type": "module",
   "description": "Lightweight RPC protocol for C, js, and more",
   "main": "lightrpc.js",
@@ -16,6 +16,6 @@
     "@vitest/ui": "^2.1.4"
   },
   "files": [
-    "lightrpc.js"
+    "literpc.js"
   ]
 }

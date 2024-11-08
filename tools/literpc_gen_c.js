@@ -30,12 +30,12 @@ const cTypes = {
 }
 
 function exportDefs(defs = {}, ops=[]) {
-  const out = [`// Example usage of lightrpc
+  const out = [`// Example usage of literpc
 // Compile with gcc FILE.c -o PROGRAM
 
 #include <stdio.h>
 #include <stdint.h>
-#include "lightrpc.h"
+#include "literpc.h"
 
 // these are the available RPC commands
 typedef enum {
@@ -49,7 +49,7 @@ typedef enum {
 } ${typeName};
 `)
     out.push(`const FieldDescriptor ${typeName.toLowerCase()}_fields[] = {
-  ${Object.entries(fields).map(([fieldName, fieldType]) => viewTypes.includes(fieldType) ? `LIGHTRPC_FIELD(${typeName}, ${fieldName}, ${fieldTypes[fieldType]})` : `LIGHTRPC_FIELD_STRUCT(${typeName}, ${fieldName}, ${typeName.toLowerCase()}_fields, ${typeName.toLowerCase()}_fields_len)`).join(',\n  ')}
+  ${Object.entries(fields).map(([fieldName, fieldType]) => viewTypes.includes(fieldType) ? `LITERPC_FIELD(${typeName}, ${fieldName}, ${fieldTypes[fieldType]})` : `LITERPC_FIELD_STRUCT(${typeName}, ${fieldName}, ${typeName.toLowerCase()}_fields, ${typeName.toLowerCase()}_fields_len)`).join(',\n  ')}
 };
 `)
   }
@@ -58,7 +58,7 @@ typedef enum {
   int len = 0;
   int cmd = 0;
 
-  ${Object.entries(defs).map(([typeName, fields]) => `${typeName} ${typeName.toLowerCase()} = {0}; // Create your ${typeName} struct here\n  len = lightrpc_serialize(buffer, &${typeName.toLowerCase()}, ${ops[0] ? `RPC_${ops[0]}` : 0}, ${typeName.toLowerCase()}_fields, ${typeName.toLowerCase()}_fields_len);\n\n  ${typeName} decoded${typeName} = {0};\n  cmd = lightrpc_deserialize(buffer, len, &decoded${typeName}, ${typeName.toLowerCase()}_fields, ${typeName.toLowerCase()}_fields_len);`).join('\n\n  ')}
+  ${Object.entries(defs).map(([typeName, fields]) => `${typeName} ${typeName.toLowerCase()} = {0}; // Create your ${typeName} struct here\n  len = literpc_serialize(buffer, &${typeName.toLowerCase()}, ${ops[0] ? `RPC_${ops[0]}` : 0}, ${typeName.toLowerCase()}_fields, ${typeName.toLowerCase()}_fields_len);\n\n  ${typeName} decoded${typeName} = {0};\n  cmd = literpc_deserialize(buffer, len, &decoded${typeName}, ${typeName.toLowerCase()}_fields, ${typeName.toLowerCase()}_fields_len);`).join('\n\n  ')}
 }`)
   return out.join('\n')
 }

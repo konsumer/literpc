@@ -1,8 +1,8 @@
-// this is a tester for lightrpc
+// this is a tester for literpc
 
 #include <stdio.h>
 #include <assert.h>
-#include "../lightrpc.h"
+#include "../literpc.h"
 
 void dumphex(const void* data, size_t size) {
   char ascii[17];
@@ -46,16 +46,16 @@ typedef struct {
 
 // Field descriptors for Point
 const FieldDescriptor point_fields[] = {
-    LIGHTRPC_FIELD(Point, x, FIELD_FLOAT),
-    LIGHTRPC_FIELD(Point, y, FIELD_FLOAT)
+    LITERPC_FIELD(Point, x, FIELD_FLOAT),
+    LITERPC_FIELD(Point, y, FIELD_FLOAT)
 };
 const int point_fields_len = 2;
 
 // Field descriptors for Entity
 const FieldDescriptor entity_fields[] = {
-    LIGHTRPC_FIELD(Entity, id, FIELD_INT),
-    LIGHTRPC_FIELD_STRUCT(Entity, location, point_fields, point_fields_len),
-    LIGHTRPC_FIELD(Entity, name, FIELD_STRING)
+    LITERPC_FIELD(Entity, id, FIELD_INT),
+    LITERPC_FIELD_STRUCT(Entity, location, point_fields, point_fields_len),
+    LITERPC_FIELD(Entity, name, FIELD_STRING)
 };
 const int entity_fields_len = 3;
 
@@ -67,10 +67,10 @@ int main(int argc, char *argv[]) {
   };
 
   uint8_t buffer[1024];
-  int len = lightrpc_serialize(buffer, &entity, 1, entity_fields, entity_fields_len);
+  int len = literpc_serialize(buffer, &entity, 1, entity_fields, entity_fields_len);
 
   Entity decoded = {0};
-  int cmd = lightrpc_deserialize(buffer, len, &decoded, entity_fields, entity_fields_len);
+  int cmd = literpc_deserialize(buffer, len, &decoded, entity_fields, entity_fields_len);
 
   uint8_t expectedBuffer[] = {
     1,0,               // op = 1

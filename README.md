@@ -91,7 +91,7 @@ Here is the breakdown of how it's encodes:
 You can do this in javascript:
 
 ```js
-import { serialize, deserialize } from 'lightrpc'
+import { serialize, deserialize } from 'literpc'
 import { readFile } from 'node:fs/promises'
 
 const {ops, ...defs} = JSON.parse(await readFile('tools/defs.example.json', 'utf8'))
@@ -111,5 +111,5 @@ const [command, decoded] = deserialize(defs, 'MyThing', bytes)
 I created a tool to generate light C code from my JSON format (similar to what you see in [test.c](tools/test.c).) Use it like this:
 
 ```
-node tools/lightrpc_gen_c.js tools/defs.example.json
+node tools/literpc_gen_c.js tools/defs.example.json
 ```
