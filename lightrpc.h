@@ -1,3 +1,6 @@
+// use this in header in your C project to use lightrpc!
+// https://github.com/konsumer/lightrpc
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

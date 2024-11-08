@@ -1,0 +1,15 @@
+{
+  "Point": {
+    "x": "Float32",
+    "y": "Float32"
+  },
+  "MyThing": {
+    "id": "Int32",
+    "location": "Point",
+    "name": "String"
+  },
+  "ops": [
+    "NONE",
+    "MESS_WITH_MY_THING"
+  ]
+}

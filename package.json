@@ -1,0 +1,21 @@
+{
+  "name": "lightrpc",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Lightweight RPC protocol for C, js, and more",
+  "main": "lightrpc.js",
+  "scripts": {
+    "test": "NODE_NO_WARNINGS=1 npx -y vitest --run --globals",
+    "test:watch": "NODE_NO_WARNINGS=1 npx -y vitest --globals --ui",
+    "test:c": "gcc tools/test.c -o lightrpctest && ./lightrpctest"
+  },
+  "keywords": [],
+  "author": "David Konsumer <konsumer@jetboystudio.com> (https://konsumer.js.org/)",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitest/ui": "^2.1.4"
+  },
+  "files": [
+    "lightrpc.js"
+  ]
+}
