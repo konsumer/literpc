@@ -101,7 +101,7 @@ Or use it on the web:
 <script type="importmap">
   {
     "imports": {
-      "@konsumer/litetrpc": "@konsumer/litetrpc"
+      "@konsumer/litetrpc": "https://esm.sh/@konsumer/litetrpc"
     }
   }
 </script>
