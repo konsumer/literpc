@@ -1,6 +1,6 @@
 This is a very lightweight RPC protocol I designed to be easy to parse in any language, originally designed for sending commands over wasm, without adding too much code to the wasm.
 
-The basic idea is that the first byte is a "command" (`uint16`) and the rest is encoded bytes, and both sides need to know the structure. Think of it as very low-end grpc/protobuf. It's optimized for encoding/decoding-speed & simplicity, and although the outputted bytes are not as small as possible, the size beats other serialization-formats.
+The basic idea is that the first byte is a "command" (`uint16`) and the rest is encoded bytes, and both sides need to know the structure. Think of it as very low-end grpc/protobuf. It's optimized for encoding/decoding-speed & simplicity, and although the outputted bytes are not as small as possible (protobuf is a bit better) the size beats other serialization-formats, and the simplicity & lightweight codec might be a good trade.
 
 This allows you to expose a single function in your wasm-host (or whatever else) that can respond to RPC-requests, and get/set complex params/responses.
 
