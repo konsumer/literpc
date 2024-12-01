@@ -47,8 +47,6 @@ Here are the valid-types:
 - `String`
 - `SomethingElse` - use another message in the definition (like in above example, with `Point`)
 
-Additionally, you can also append `[]` for an array, like `Uint8[]`.
-
 The bytes look like this:
 
 ```js
@@ -166,3 +164,8 @@ b = literpc.serialize(ops.index('MESS_WITH_MY_THING'), defs, 'MyThing', thing)
 
 o = literpc.deserialize(defs, 'MyThing', b)
 ```
+
+### TODO
+
+- I would like to support Arrays for all types (with `[]` and `[X]` in schema.) Strings could be considered `Int8[]`, in terms of parsing.
+- Aliases like `u8=Uint8` would let you use `u8` as type. Also `Timestamp=Uint32` so you can kind of label an existing type as something else.
